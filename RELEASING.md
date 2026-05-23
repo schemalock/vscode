@@ -48,7 +48,7 @@ make release
 
 ## Release procedure
 
-1. Bump `package.json` version (e.g. `0.3.3` → `0.3.4`).
+1. Bump `package.json` version (e.g. `0.1.1` → `0.1.2`).
 2. Add a `## X.Y.Z — YYYY-MM-DD` section to `CHANGELOG.md`. User-facing
    only — no milestone codes, no codicons, no internal jargon.
 3. Update the install snippet in `README.md` to the new version.

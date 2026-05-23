@@ -38,6 +38,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<Extens
   setState("starting");
   outputChannel.appendLine("SchemaLock activating");
 
+  void warnIfConflictingYamlExtension(context, outputChannel);
+
   activeContext = context;
 
   let binaryPath: string;
@@ -197,6 +199,45 @@ async function stopClient(): Promise<void> {
   if (client) {
     await client.stop();
     client = undefined;
+  }
+}
+
+const CONFLICTING_EXTENSION_ID = "redhat.vscode-yaml";
+const SUPPRESS_CONFLICT_WARNING_KEY = "schemalock.suppressYamlConflictWarning";
+
+async function warnIfConflictingYamlExtension(
+  context: vscode.ExtensionContext,
+  channel: vscode.OutputChannel
+): Promise<void> {
+  const conflict = vscode.extensions.getExtension(CONFLICTING_EXTENSION_ID);
+  if (!conflict) return;
+
+  if (context.globalState.get<boolean>(SUPPRESS_CONFLICT_WARNING_KEY)) {
+    channel.appendLine(
+      `[extension] ${CONFLICTING_EXTENSION_ID} is installed but warning is suppressed`
+    );
+    return;
+  }
+
+  channel.appendLine(
+    `[extension] detected conflicting extension: ${CONFLICTING_EXTENSION_ID}`
+  );
+
+  const manage = "Manage Extension";
+  const dontShow = "Don't show again";
+  const choice = await vscode.window.showWarningMessage(
+    "SchemaLock and Red Hat YAML are both active. They publish duplicate (and sometimes incorrect) diagnostics on the same YAML files. Disable Red Hat YAML for the best experience.",
+    manage,
+    dontShow
+  );
+
+  if (choice === manage) {
+    await vscode.commands.executeCommand(
+      "workbench.extensions.search",
+      `@id:${CONFLICTING_EXTENSION_ID}`
+    );
+  } else if (choice === dontShow) {
+    await context.globalState.update(SUPPRESS_CONFLICT_WARNING_KEY, true);
   }
 }
 
