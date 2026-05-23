@@ -1,51 +1,78 @@
 # SchemaLock VS Code extension — release Makefile.
 #
-# Reads the version from package.json. Run `make help` for the target list,
-# `make release` for a full one-shot release.
+# Reads the version from package.json and the bundled app tag from
+# .app-version. Run `make help` for the target list, `make release` for
+# a full one-shot release.
 
 SHELL  := /usr/bin/env bash
 .SHELLFLAGS := -eu -o pipefail -c
 
 VERSION := $(shell node -p "require('./package.json').version")
 TAG     := v$(VERSION)
+APP_TAG := $(shell tr -d '[:space:]' < .app-version 2>/dev/null || echo "MISSING")
 VSIXES  := schemalock-*-$(VERSION).vsix
+APP_DIR := ../app
 
 .DEFAULT_GOAL := help
 
-.PHONY: help preflight bundle binaries package publish-vsce publish-ovsx publish tag gh-release release clean
+.PHONY: help dev-vsix preflight bundle binaries package publish-vsce publish-ovsx publish tag gh-release release clean
 
 help:
 	@printf "SchemaLock VS Code extension — release targets\n\n"
-	@printf "Current version: %s (tag %s)\n\n" "$(VERSION)" "$(TAG)"
-	@printf "  make preflight     verify clean tree, branch=main, CHANGELOG entry exists\n"
-	@printf "  make package       bundle + build 5 binaries + 5 VSIX (no publish)\n"
+	@printf "Current vscode version: %s (tag %s)\n" "$(VERSION)" "$(TAG)"
+	@printf "Pinned app tag        : %s\n\n" "$(APP_TAG)"
+	@printf "  make dev-vsix      local-platform VSIX for smoke testing (no preflight, no publish)\n"
+	@printf "  make preflight     clean trees + branches + CHANGELOG + tag-not-taken + .app-version pin\n"
+	@printf "  make package       bundle + build 5 binaries (against pinned app tag) + 5 VSIX\n"
 	@printf "  make publish       vsce + ovsx publish all 5 VSIX (needs VSCE_PAT, OVSX_PAT)\n"
-	@printf "  make tag           create and push v\$$VERSION tag\n"
+	@printf "  make tag           create + push v\$$VERSION tag\n"
 	@printf "  make gh-release    gh release create with the 5 VSIX attached\n"
 	@printf "  make release       preflight → package → publish → tag → gh-release\n"
 	@printf "  make clean         remove dist/, bin/, *.vsix\n\n"
 	@printf "Required env for publish: VSCE_PAT (Visual Studio Marketplace), OVSX_PAT (Open VSX).\n"
 
+dev-vsix:
+	bash scripts/dev-vsix.sh
+
 preflight:
-	@if [ -n "$$(git status --porcelain)" ]; then \
-	  echo "ERROR: working tree not clean"; exit 1; \
+	@if [ ! -f .app-version ]; then \
+	  echo "ERROR: .app-version file missing"; exit 1; \
 	fi
-	@if [ "$$(git rev-parse --abbrev-ref HEAD)" != "main" ]; then \
-	  echo "ERROR: not on main branch (on $$(git rev-parse --abbrev-ref HEAD))"; exit 1; \
+	@if [ "$(APP_TAG)" = "MISSING" ] || [ -z "$(APP_TAG)" ]; then \
+	  echo "ERROR: .app-version is empty"; exit 1; \
+	fi
+	@if [ -n "$$(git status --porcelain)" ]; then \
+	  echo "ERROR: vscode working tree not clean"; exit 1; \
+	fi
+	@branch=$$(git rev-parse --abbrev-ref HEAD); \
+	if [ "$$branch" != "master" ] && [ "$$branch" != "main" ]; then \
+	  echo "ERROR: not on release branch (on $$branch)"; exit 1; \
 	fi
 	@if ! grep -qE "^## $(VERSION)( |$$)" CHANGELOG.md; then \
 	  echo "ERROR: CHANGELOG.md missing '## $(VERSION)' header"; exit 1; \
 	fi
 	@if git rev-parse "$(TAG)" >/dev/null 2>&1; then \
-	  echo "ERROR: tag $(TAG) already exists"; exit 1; \
+	  echo "ERROR: vscode tag $(TAG) already exists"; exit 1; \
 	fi
-	@echo "preflight OK — version $(VERSION)"
+	@if [ -n "$$(git -C $(APP_DIR) status --porcelain)" ]; then \
+	  echo "ERROR: ../app working tree not clean"; exit 1; \
+	fi
+	@actual=$$(git -C $(APP_DIR) describe --exact-match --tags HEAD 2>/dev/null || echo ""); \
+	if [ "$$actual" != "$(APP_TAG)" ]; then \
+	  echo "ERROR: ../app HEAD is at '$${actual:-untagged}', .app-version pins '$(APP_TAG)'"; \
+	  echo "       cd $(APP_DIR) && git checkout $(APP_TAG)"; \
+	  exit 1; \
+	fi
+	@if ! git -C $(APP_DIR) rev-parse "$(APP_TAG)^{tag}" >/dev/null 2>&1; then \
+	  echo "ERROR: ../app $(APP_TAG) is not an annotated tag"; exit 1; \
+	fi
+	@echo "preflight OK — vscode $(VERSION) bundling app $(APP_TAG)"
 
 bundle:
 	node esbuild.js --minify
 
 binaries:
-	bash scripts/build-binaries.sh
+	BUILD_MODE=release bash scripts/build-binaries.sh
 
 package: bundle binaries
 	bash scripts/package-all.sh

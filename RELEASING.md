@@ -1,14 +1,40 @@
 # Releasing
 
-Manual, local, Makefile-driven. From a clean `main` working tree:
+Manual, local, Makefile-driven. From a clean release-branch working tree:
 
 ```bash
 make release
 ```
 
-Reads the version from `package.json` and runs the full pipeline:
-preflight → package (5 platform VSIX) → publish (Marketplace + Open VSX) →
-tag → GitHub release.
+Reads `package.json` version and the app tag from `.app-version`, then runs
+the full pipeline: preflight → package (5 platform VSIX, each bundling the
+pinned app tag) → publish (Marketplace + Open VSX) → tag → GitHub release.
+
+## Two-repo coordination
+
+`vscode/` and `../app/` version **independently**. This repo's `.app-version`
+file names which `app/` tag a release VSIX bundles.
+
+| Change shape | vscode bump | app tag | `.app-version` |
+|---|---|---|---|
+| Extension-only (UI, README, activation) | yes | no | unchanged |
+| App-only (LSP, schema resolution) | yes | yes | updated to new app tag |
+| Both | yes | yes | updated to new app tag |
+
+vscode bumps on **every** release — marketplace versions are immutable.
+`.app-version` only moves when app changed.
+
+## Local iteration
+
+For smoke-testing without bumping versions:
+
+```bash
+make dev-vsix       # local-platform-only VSIX, version <base>-dev.<sha>
+code --install-extension <result>.vsix --force
+```
+
+`make dev-vsix` ignores `.app-version` and builds against current `../app`
+HEAD. The `-dev.<sha>` semver-prerelease tag prevents accidental publish.
 
 ## One-time setup
 
@@ -48,22 +74,35 @@ make release
 
 ## Release procedure
 
-1. Bump `package.json` version (e.g. `0.1.1` → `0.1.2`).
-2. Add a `## X.Y.Z — YYYY-MM-DD` section to `CHANGELOG.md`. User-facing
-   only — no milestone codes, no codicons, no internal jargon.
-3. Update the install snippet in `README.md` to the new version.
-4. Commit on a branch, PR, merge `--no-ff` to `main`.
-5. Pull `main`, then:
-   ```bash
-   make release   # direnv loads VSCE_PAT + OVSX_PAT from .envrc
-   ```
+### App changed too (bundling a new app tag)
+
+1. **In `../app/`** — branch the fix, merge to `master`, bump
+   `cmd/schemalock/main.go` `var version`, add `## X.Y.Z` to
+   `app/CHANGELOG.md`, tag `vX.Y.Z` annotated.
+2. **In `vscode/`** — update `.app-version` to the new app tag (own commit).
+3. Bump `package.json` version (e.g. `0.1.1` → `0.1.2`).
+4. Add `## X.Y.Z — YYYY-MM-DD` to `CHANGELOG.md`. User-facing only.
+5. Update install snippet in `README.md`.
+6. Commit on a branch, merge `--no-ff` to `master`, `make release`.
+
+### Extension-only (`.app-version` unchanged)
+
+1. Bump `package.json`.
+2. Add `## X.Y.Z` to `CHANGELOG.md`.
+3. Update install snippet in `README.md`.
+4. Commit on a branch, merge `--no-ff` to `master`, `make release`.
+
+`make release` runs preflight: clean tree in both repos, vscode on
+release branch with HEAD=`vX.Y.Z` matching `package.json`, app HEAD =
+the tag in `.app-version`. Refuses if any check fails.
 
 ## Targets
 
 ```
-make help          show targets + current version
-make preflight     clean tree + branch=main + CHANGELOG entry + tag-not-taken
-make package       bundle + build 5 binaries + 5 VSIX (no network)
+make help          show targets + current version + pinned app tag
+make dev-vsix      local-platform VSIX, version <base>-dev.<sha> (no publish)
+make preflight     clean tree, branch, CHANGELOG, tag-not-taken, app pin check
+make package       bundle + build 5 binaries (against pinned app tag) + 5 VSIX
 make publish       vsce + ovsx publish all 5 VSIX
 make tag           create + push vX.Y.Z annotated tag
 make gh-release    gh release create attaching the 5 VSIX
