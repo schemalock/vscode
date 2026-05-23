@@ -2,7 +2,7 @@
   "name": "schemalock",
   "displayName": "SchemaLock",
   "description": "Versioned, integrity-pinned schemas for YAML — autocomplete and validation for Kubernetes CRDs from cdn.schemalock.dev",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "SchemaLock",
   "license": "Apache-2.0",
   "repository": {

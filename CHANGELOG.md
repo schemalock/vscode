@@ -3,6 +3,17 @@
 All notable changes to the SchemaLock VS Code extension are documented in
 this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 0.1.2 — 2026-05-23
+
+### Fixed
+
+- Autocomplete inside one block returned completions from a different
+  sibling block when the preceding block contained deeper-nested keys.
+  For example, pressing Ctrl+Space inside `unauthorizedUserAccessSpec`
+  on a VMAuth document offered `httpRoute`'s properties instead of the
+  expected `discover_backend_ips`, `default_url`, `targetRefs`, etc.
+  Bundled `schemalock` binary updated to v0.1.1.
+
 ## 0.1.1 — 2026-05-23
 
 ### Added

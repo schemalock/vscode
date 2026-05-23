@@ -31,7 +31,7 @@ ovsx get SchemaLock.schemalock
 **Manual `.vsix`**
 
 ```bash
-code --install-extension schemalock-vscode-darwin-arm64-0.1.1.vsix
+code --install-extension schemalock-vscode-darwin-arm64-0.1.2.vsix
 ```
 
 (Substitute the file matching your OS and architecture.)
