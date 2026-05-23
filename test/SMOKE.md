@@ -1,16 +1,15 @@
-# SchemaLock Extension — Manual Smoke Test Checklist (v0.2.0)
+# SchemaLock Extension — Manual Smoke Test Checklist (v0.1.1)
 
 Run before publishing to the Marketplace. All items must pass on each target
 platform.
 
-## Architecture recap (v0.2.0)
+## Architecture recap
 
 There is **one** startup path. The extension spawns the bundled `schemalock`
 binary, which owns yaml LSP traffic end-to-end: it spawns yaml-language-server
 as a subprocess and proxies unowned YAML to it. Owned documents (apiVersion +
-kind present in `schemalock.lock`) are served by schemalock; everything else is
-served by yaml-ls. There is no `schemalock.mode` setting and no contributor /
-standalone split.
+kind present in `schemalock.lock`, **or** resolved from `cdn.schemalock.dev`)
+are served by schemalock; everything else is served by yaml-ls.
 
 ## Environment setup
 
@@ -20,7 +19,7 @@ standalone split.
       conflict matrix).
 - [ ] Install the per-platform `.vsix`:
       ```bash
-      code --install-extension schemalock-vscode-0.2.0-darwin-arm64.vsix
+      code --install-extension schemalock-darwin-arm64-0.1.1.vsix
       ```
       Replace `darwin-arm64` with `linux-x64`, `linux-arm64`, `darwin-x64`, or
       `win32-x64` as appropriate.
@@ -46,7 +45,8 @@ standalone split.
 ## Unowned document (yaml-ls proxy)
 
 - [ ] In the same workspace, create or open a YAML file whose `apiVersion` /
-      `kind` is **not** in `schemalock.lock` (e.g. a stock `Deployment`).
+      `kind` is **not** in `schemalock.lock` and is **not** indexed by the CDN
+      (e.g. a stock `Deployment`).
 - [ ] Confirm yaml-ls features still work: indentation completion, generic
       YAML syntax diagnostics, document symbols (Outline panel populated).
 - [ ] Hover / completion are served by yaml-ls (schemalock makes no claim).
@@ -96,11 +96,16 @@ standalone split.
 ## Conflict with redhat.vscode-yaml
 
 - [ ] Install `redhat.vscode-yaml` and reload.
-- [ ] Open `vmcluster.yaml`. Owned diagnostics should appear **once**, not
-      duplicated by yaml-ls (schemalock's yaml-ls subprocess drops diagnostics
-      for owned URIs, but the user-installed yaml-ls extension does not — this
-      is the known limitation; document any duplicates observed).
-- [ ] Uninstall `redhat.vscode-yaml` before continuing.
+- [ ] On activation, SchemaLock shows a one-time warning notification stating
+      both extensions are active and offers **Manage Extension** /
+      **Don't show again**.
+- [ ] Click **Manage Extension** → Extensions panel opens filtered to
+      `redhat.vscode-yaml`. Disable it from there.
+- [ ] Reload — warning does not reappear (redhat extension no longer active).
+- [ ] Re-enable redhat.vscode-yaml and reload — warning appears again.
+- [ ] Click **Don't show again** → warning gone for this session and future
+      reloads. To re-arm: clear the `schemalock.suppressYamlConflictWarning`
+      key from globalState (e.g. via Dev Tools console).
 
 ## Windows (win32-x64)
 
@@ -168,5 +173,5 @@ Before pushing to the Marketplace, confirm:
       exits 0.
 - [ ] `npm run build:binaries` produces 5 binaries, each < 20 MB.
 - [ ] `npm run package` produces 5 `.vsix` files.
-- [ ] `CHANGELOG.md` entry for `0.2.0` is present and accurate.
-- [ ] Git tag `v0.2.0` is ready to push after publish succeeds.
+- [ ] `CHANGELOG.md` entry for `0.1.1` is present and accurate.
+- [ ] Git tag `v0.1.1` is ready to push after publish succeeds.

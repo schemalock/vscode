@@ -2,11 +2,9 @@
 "use strict";
 /**
  * activation.test.js — verifies the extension activates and registers its
- * commands in a workspace that has NO schemalock.lock. This covers the
- * new-user case: prior to 0.3.2 the extension early-returned during
- * activate() when no lockfile was found, leaving commands unregistered and
- * the LSP unstarted. CDN-fallback is meant to handle the lockless case, so
- * activation must proceed.
+ * commands in a workspace that has NO schemalock.lock. CDN-fallback is
+ * meant to handle the lockless case, so activation must proceed for the
+ * new-user flow even when the lockfile is absent.
  *
  * runTest-lockless.js opens fixtures/workspace_no_lockfile as the
  * workspace root, so the activation event onLanguage:yaml is the only one
