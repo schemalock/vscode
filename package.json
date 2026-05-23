@@ -1,0 +1,132 @@
+{
+  "name": "schemalock",
+  "displayName": "SchemaLock",
+  "description": "Versioned, integrity-pinned schemas for YAML — autocomplete and validation for Kubernetes CRDs from cdn.schemalock.dev",
+  "version": "0.3.3",
+  "publisher": "SchemaLock",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/schemalock/vscode.git"
+  },
+  "icon": "resources/icon.png",
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "yaml",
+    "kubernetes",
+    "crd",
+    "schema",
+    "validation",
+    "lsp",
+    "victoriametrics"
+  ],
+  "engines": {
+    "vscode": "^1.92.0"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "workspaceContains:**/schemalock.lock",
+    "workspaceContains:**/schemalock.yaml",
+    "onLanguage:yaml"
+  ],
+  "extensionDependencies": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "schemalock.restartLanguageServer",
+        "title": "SchemaLock: Restart Language Server",
+        "category": "SchemaLock"
+      },
+      {
+        "command": "schemalock.showOutput",
+        "title": "SchemaLock: Show Output",
+        "category": "SchemaLock"
+      },
+      {
+        "command": "schemalock.pickSchemaVersion",
+        "title": "SchemaLock: Pick Schema Version for This File…",
+        "category": "SchemaLock"
+      },
+      {
+        "command": "schemalock.retryResolve",
+        "title": "SchemaLock: Retry CDN Resolution",
+        "category": "SchemaLock"
+      },
+      {
+        "command": "schemalock.dumpCaches",
+        "title": "SchemaLock: Dump Caches (Debug)",
+        "category": "SchemaLock",
+        "enablement": "schemalock.debug"
+      }
+    ],
+    "configuration": {
+      "title": "SchemaLock",
+      "properties": {
+        "schemalock.yamlLanguageServer.path": {
+          "type": "string",
+          "default": "",
+          "description": "Override the path to yaml-language-server. When empty, schemalock searches PATH. When the binary cannot be located, schemalock starts without yaml-ls and only provides validation for CRDs in your schemalock.lock."
+        },
+        "schemalock.binaryPath": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Override the bundled schemalock binary with a custom path. When null, the extension uses the bundled per-platform binary."
+        },
+        "schemalock.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace LSP communication between VS Code and the schemalock binary."
+        },
+        "schemalock.fallback.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "When enabled, schemalock fetches schemas from cdn.schemalock.dev for kinds not in your lockfile. Disable to restrict schemalock to lockfile-pinned schemas only."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc --noEmit",
+    "compile:unit": "tsc --outDir dist --module commonjs --target ES2022",
+    "bundle": "node esbuild.js",
+    "bundle:release": "node esbuild.js --minify",
+    "watch": "node esbuild.js --watch",
+    "build": "npm run compile && npm run bundle",
+    "build:binaries": "bash scripts/build-binaries.sh",
+    "package": "bash scripts/package-all.sh",
+    "lint": "eslint src --ext .ts",
+    "test": "node ./test/runTest.js && node ./test/runTest-lockless.js",
+    "test:lockless": "node ./test/runTest-lockless.js",
+    "pretest": "npm run bundle",
+    "test:unit": "npm run compile:unit && mocha --extension .js --recursive test/unit"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1",
+    "yaml": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.92.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.4.0",
+    "@vscode/vsce": "^2.31.0",
+    "esbuild": "^0.23.0",
+    "eslint": "^8.57.0",
+    "glob": "^10.4.0",
+    "mocha": "^11.7.6",
+    "typescript": "^5.5.0"
+  }
+}

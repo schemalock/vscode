@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Lint, type-check, and bundle the extension. We do not run the
+  # @vscode/test-electron integration tests in CI: those require the
+  # `schemalock` binary from sibling repo schemalock/app, which would
+  # need a release-download step (or a Go build with the right pin).
+  # See the issue tracker for the follow-up to wire that up.
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run compile
+
+      - name: Bundle
+        run: npm run bundle
+
+      - name: Unit tests
+        run: npm run test:unit

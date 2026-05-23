@@ -1,0 +1,17 @@
+**
+!dist/**
+!bin/**
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!resources/icon.png
+node_modules
+src
+test
+scripts
+tsconfig.json
+esbuild.js
+.eslintrc.cjs
+*.vsix
+.vscode-test

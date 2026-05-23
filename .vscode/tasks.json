@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm: bundle",
+      "type": "npm",
+      "script": "bundle",
+      "presentation": { "reveal": "silent" },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "npm: watch",
+      "type": "npm",
+      "script": "watch",
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "group": "build",
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "^\\s*([^\\s].*)\\((\\d+),(\\d+)\\):\\s+(error|warning):\\s+(.*)$",
+              "file": 1,
+              "line": 2,
+              "column": 3,
+              "severity": 4,
+              "message": 5
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "\\[esbuild\\] watching",
+            "endsPattern": "build finished"
+          }
+        }
+      ]
+    },
+    {
+      "label": "go: build binary (current platform)",
+      "type": "shell",
+      "command": "go build -o ../vscode/bin/$(uname -s | tr A-Z a-z)-$(uname -m | sed s/x86_64/x64/) ./cmd/schemalock",
+      "options": { "cwd": "${workspaceFolder}/../app" },
+      "presentation": { "reveal": "always" },
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+node_modules/
+bin/
+dist/
+*.vsix
+.vscode-test/
+.env
+.envrc
+*.token
+
+# Per-developer agent context. Everything under .claude/ is local-only.
+.claude/

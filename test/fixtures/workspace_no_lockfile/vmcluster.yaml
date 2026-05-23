@@ -1,0 +1,6 @@
+apiVersion: operator.example.com/v1beta1
+kind: ExampleCluster
+metadata:
+  name: example
+spec:
+  replicationFactor: 2
