@@ -149,8 +149,12 @@ go install github.com/schemalock/app/cmd/schemalock@latest
 
 - **Running `redhat.vscode-yaml` alongside SchemaLock causes
   `yaml-language-server` to run twice** (once inside `redhat.vscode-yaml`,
-  once as a subprocess of SchemaLock). Pick one — for SchemaLock
-  workspaces, disable `redhat.vscode-yaml` and let SchemaLock manage the
+  once as a subprocess of SchemaLock), leading to duplicate diagnostics
+  and "No content" errors from Red Hat YAML's bundled Kubernetes
+  contributor for CRDs it does not ship. SchemaLock detects this on
+  activation and offers a one-time notification with a shortcut to
+  manage the conflicting extension. For SchemaLock workspaces, disable
+  `redhat.vscode-yaml` and let SchemaLock manage the
   `yaml-language-server` lifecycle.
 - **Schema updates require running `schemalock lock` again** for pinned
   files. The lockfile watcher reloads the resolver automatically; open
