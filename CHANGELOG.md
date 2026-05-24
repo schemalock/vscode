@@ -3,6 +3,15 @@
 All notable changes to the SchemaLock VS Code extension are documented in
 this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+### Changed
+
+- Bundled `schemalock` binary now applies strict-mode validation in
+  `schemalock verify` by default, matching the LSP. Unknown YAML fields
+  cause CI to fail the same way they appear as Error diagnostics in the
+  editor. Pass `--no-strict` to opt out.
+
 ## 0.1.2 — 2026-05-23
 
 ### Fixed
