@@ -186,7 +186,6 @@ async function startClient(
       fileEvents: vscode.workspace.createFileSystemWatcher("**/schemalock.lock"),
     },
     errorHandler,
-    middleware: buildCompletionMiddleware(),
   };
 
   client = new LanguageClient("schemalock", "SchemaLock", serverOptions, clientOptions);
@@ -241,54 +240,3 @@ async function warnIfConflictingYamlExtension(
   }
 }
 
-/**
- * Completion middleware: forces a shared `filterText` when the server marks the
- * list incomplete (prevents VS Code's fuzzy ranking from overriding sortText),
- * and chains `editor.action.triggerParameterHints` on Field/Property items so
- * the next schema level pops automatically.
- */
-function buildCompletionMiddleware(): LanguageClientOptions["middleware"] {
-  return {
-    provideCompletionItem: async (document, position, context, token, next) => {
-      const list = await next(document, position, context, token);
-      if (!list) return list;
-
-      const items = Array.isArray(list) ? list : list.items;
-      const isIncomplete = !Array.isArray(list) && list.isIncomplete === true;
-
-      if (isIncomplete && items.length > 1) {
-        const first = items[0];
-        const hardcodedFilterText =
-          first.filterText ??
-          (typeof first.label === "string" ? first.label : first.label.label);
-        for (const item of items) {
-          item.filterText = hardcodedFilterText;
-        }
-      }
-
-      const paramHintsEnabled = vscode.workspace
-        .getConfiguration("editor.parameterHints", {
-          languageId: "yaml",
-          uri: document.uri,
-        })
-        .get<boolean>("enabled");
-      if (paramHintsEnabled) {
-        for (const item of items) {
-          if (
-            item.kind === vscode.CompletionItemKind.Field ||
-            item.kind === vscode.CompletionItemKind.Property
-          ) {
-            if (item.command === undefined) {
-              item.command = {
-                title: "triggerParameterHints",
-                command: "editor.action.triggerParameterHints",
-              };
-            }
-          }
-        }
-      }
-
-      return list;
-    },
-  };
-}
