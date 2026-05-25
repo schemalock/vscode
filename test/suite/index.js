@@ -8,6 +8,7 @@ function run() {
     ui: "tdd",
     color: true,
     timeout: 30000,
+    forbidPending: true,
   });
 
   const testsRoot = path.resolve(__dirname);
