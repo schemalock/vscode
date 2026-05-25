@@ -15,13 +15,14 @@ APP_DIR := ../app
 
 .DEFAULT_GOAL := help
 
-.PHONY: help dev-vsix preflight bundle binaries package publish-vsce publish-ovsx publish tag gh-release release clean
+.PHONY: help dev-vsix dev-test preflight bundle binaries package publish-vsce publish-ovsx publish tag gh-release release clean
 
 help:
 	@printf "SchemaLock VS Code extension — release targets\n\n"
 	@printf "Current vscode version: %s (tag %s)\n" "$(VERSION)" "$(TAG)"
 	@printf "Pinned app tag        : %s\n\n" "$(APP_TAG)"
 	@printf "  make dev-vsix      local-platform VSIX for smoke testing (no preflight, no publish)\n"
+	@printf "  make dev-test      rebuild bundled binary from ../app HEAD + run tests (dev iteration)\n"
 	@printf "  make preflight     clean trees + branches + CHANGELOG + tag-not-taken + .app-version pin\n"
 	@printf "  make package       bundle + build 5 binaries (against pinned app tag) + 5 VSIX\n"
 	@printf "  make publish       vsce + ovsx publish all 5 VSIX (needs VSCE_PAT, OVSX_PAT)\n"
@@ -33,6 +34,21 @@ help:
 
 dev-vsix:
 	bash scripts/dev-vsix.sh
+
+# dev-test: rebuild the bundled darwin-arm64 binary from ../app HEAD then run
+# vscode tests. Use this when iterating against unreleased app/ changes —
+# release uses the .app-version-pinned binary instead (see preflight).
+#
+# Hardcoded to darwin-arm64 because (a) the only developer machines that hit
+# this target are macOS arm64, and (b) cross-compile fan-out is owned by
+# scripts/build-binaries.sh which is what `make release` calls.
+dev-test:
+	@echo "==> rebuilding bundled binary from ../app HEAD (darwin-arm64)"
+	cd $(APP_DIR) && go build -o ../vscode/bin/darwin-arm64/schemalock ./cmd/schemalock
+	npm run compile
+	npm run lint
+	npm run bundle
+	npm test
 
 preflight:
 	@if [ ! -f .app-version ]; then \
