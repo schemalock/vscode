@@ -3,14 +3,35 @@
 All notable changes to the SchemaLock VS Code extension are documented in
 this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## 0.2.0 — 2026-06-02
 
 ### Changed
 
-- Bundled `schemalock` binary now applies strict-mode validation in
-  `schemalock verify` by default, matching the LSP. Unknown YAML fields
-  cause CI to fail the same way they appear as Error diagnostics in the
-  editor. Pass `--no-strict` to opt out.
+- **Lockfile replaced by `schemalock.yaml` intent files.** The `schemalock lock`
+  command and `schemalock.lock` file are removed. The bundled binary reads
+  `schemalock.yaml` directly — no generation step required. Run
+  `schemalock add <operator@version>` to pin an operator; the extension
+  picks up the change on save automatically.
+- **Hierarchical intent.** `schemalock.yaml` files nest: the effective pin set
+  for a manifest is the union of every `schemalock.yaml` found walking up from
+  the manifest's directory. A nested file with `root: true` halts the walk.
+- **`schemalock verify` now applies strict-mode validation by default.**
+  Unknown YAML fields cause CI to fail the same way they appear as Error
+  diagnostics in the editor. Pass `--no-strict` to restore the previous
+  behaviour.
+- **New CLI commands:** `schemalock add <name@version>` pins an operator to
+  the nearest `schemalock.yaml`; `schemalock fmt` canonicalises the file.
+- Extension watches `schemalock.yaml` for changes (was `schemalock.lock`).
+
+### Fixed
+
+- **Per-field diagnostic anchoring.** Each unknown field gets its own squiggle
+  at the offending key's source position, not on the parent.
+- **Completion filters as you type.** VS Code now filters the completion list
+  locally instead of re-querying the server on every keystroke.
+- Multiple LSP stability fixes: concurrent resolver coalescing, worker pool
+  shutdown race, yaml-ls stdout drain, atomic strict-mode flag, cache path
+  traversal guard, HTTP response size cap.
 
 ## 0.1.2 — 2026-05-23
 

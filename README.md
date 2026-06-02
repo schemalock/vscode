@@ -31,7 +31,7 @@ ovsx get SchemaLock.schemalock
 **Manual `.vsix`**
 
 ```bash
-code --install-extension schemalock-vscode-darwin-arm64-0.1.2.vsix
+code --install-extension schemalock-darwin-arm64-0.2.0.vsix
 ```
 
 (Substitute the file matching your OS and architecture.)
@@ -51,12 +51,20 @@ code --install-extension schemalock-vscode-darwin-arm64-0.1.2.vsix
    pick a different version for the active file (preview only — does not
    modify any lockfile).
 
-## Lock CRD versions for your team
+## Pin CRD versions for your team
 
 For reproducible validation across CI and contributors, commit a
-`schemalock.lock` to your repo.
+`schemalock.yaml` to your repo.
 
-1. Create `schemalock.yaml` next to your manifests:
+1. Add an operator pin (`schemalock` CLI is bundled with the extension,
+   or install separately with
+   `go install github.com/schemalock/app/cmd/schemalock@latest`):
+
+   ```bash
+   schemalock add operator.victoriametrics.com@0.70.0
+   ```
+
+   This writes (or updates) the nearest `schemalock.yaml`:
 
    ```yaml
    version: 1
@@ -65,25 +73,26 @@ For reproducible validation across CI and contributors, commit a
        - operator.victoriametrics.com@0.70.0
    ```
 
-2. Generate the lockfile (`schemalock` CLI is bundled with the extension,
-   or install separately with
-   `go install github.com/schemalock/app/cmd/schemalock@latest`):
+2. The extension reloads automatically on save — no generation step. Files
+   whose `apiVersion`+`kind` match a pinned entry are served from the
+   integrity-verified schema; everything else uses the CDN fallback.
 
-   ```bash
-   schemalock lock
-   ```
+### Hierarchical pinning
 
-3. Reload the editor. Files whose `apiVersion`+`kind` match an entry are
-   now served from the integrity-pinned schema; everything else continues
-   to use the CDN fallback.
+`schemalock.yaml` files nest. Place a root file at the repo root and
+overlay files in sub-directories — the effective pin set for each manifest
+is the union of every `schemalock.yaml` walking up from that file's
+directory, with the closest file winning on conflicts. A nested file with
+`root: true` stops the walk (useful for monorepo sub-projects).
 
 ## How it works
 
 A single `schemalock serve --stdio` subprocess runs as the LSP server for
-`yaml` documents. For documents whose `apiVersion`+`kind` are in the
-lockfile, SchemaLock provides diagnostics, completion, hover, definition,
-references, and document symbols using the integrity-pinned schema. For
-documents not in the lockfile, the extension auto-fetches the latest
+`yaml` documents. For documents whose `apiVersion`+`kind` appear in the
+nearest `schemalock.yaml` (walking up the directory tree), SchemaLock
+provides diagnostics, completion, hover, definition, references, and
+document symbols using the integrity-verified schema. For documents not
+covered by any intent file, the extension auto-fetches the latest
 available schema from `cdn.schemalock.dev`.
 
 When `yaml-language-server` is available on the host, SchemaLock spawns it

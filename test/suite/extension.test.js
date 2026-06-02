@@ -11,7 +11,7 @@
  * workspace_good opened as the workspace (see test/runTest.js).
  *
  * Scenarios (M10b Chunk 5):
- *   1. activates on workspace with schemalock.lock
+ *   1. activates on workspace with schemalock.yaml
  *   2. advertises hover + completion + definition + references + documentSymbol
  *   3. publishes diagnostics for the typo workspace
  *   4. gracefully handles missing binary path setting
@@ -42,7 +42,7 @@ async function waitFor(predicate, ms = 15000, interval = 200) {
 suite("SchemaLock Extension", function () {
   this.timeout(60000);
 
-  test("activates on workspace with schemalock.lock", async function () {
+  test("activates on workspace with schemalock.yaml", async function () {
     const ext = vscode.extensions.getExtension("SchemaLock.schemalock");
     assert.ok(ext, "extension SchemaLock.schemalock should be registered");
 

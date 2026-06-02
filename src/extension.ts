@@ -183,7 +183,7 @@ async function startClient(
       fallback: { enabled: fallbackEnabled },
     },
     synchronize: {
-      fileEvents: vscode.workspace.createFileSystemWatcher("**/schemalock.lock"),
+      fileEvents: vscode.workspace.createFileSystemWatcher("**/schemalock.yaml"),
     },
     errorHandler,
   };
