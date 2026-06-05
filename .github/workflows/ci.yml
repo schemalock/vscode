@@ -1,18 +1,14 @@
-name: ci
+name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
   workflow_dispatch:
 
 jobs:
-  # Lint, type-check, and bundle the extension. We do not run the
-  # @vscode/test-electron integration tests in CI: those require the
-  # `schemalock` binary from sibling repo schemalock/app, which would
-  # need a release-download step (or a Go build with the right pin).
-  # See the issue tracker for the follow-up to wire that up.
   build:
+    name: Lint · type-check · bundle · unit tests
     runs-on: ubuntu-latest
 
     steps:
@@ -37,3 +33,42 @@ jobs:
 
       - name: Unit tests
         run: npm run test:unit
+
+  integration:
+    name: Integration tests (xvfb)
+    # Secrets are unavailable on fork PRs — integration tests run on push to
+    # master and manual dispatch only.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/schemalock/ci-base:latest
+      options: --user root
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download schemalock binary (pinned tag)
+        run: |
+          APP_TAG=$(cat .app-version | tr -d '[:space:]')
+          mkdir -p bin/linux-x64
+          gh release download "$APP_TAG" \
+            --repo schemalock/app \
+            --pattern "schemalock-linux-x64" \
+            --output bin/linux-x64/schemalock
+          chmod +x bin/linux-x64/schemalock
+        env:
+          GH_TOKEN: ${{ secrets.SCHEMALOCK_APP_TOKEN }}
+
+      - name: Bundle
+        run: npm run bundle
+
+      - name: Integration tests
+        run: xvfb-run -a npm test
