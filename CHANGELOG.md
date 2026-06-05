@@ -3,6 +3,28 @@
 All notable changes to the SchemaLock VS Code extension are documented in
 this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 0.3.0 — 2026-06-05
+
+### Added
+
+- **Completions for composed CRD schemas.** Autocomplete now works for
+  kinds that define their properties via JSON Schema `$ref` or `allOf`
+  references rather than inline. Previously these kinds returned no
+  suggestions.
+- **Deprecated kinds shown as struck-through in autocomplete.** When the
+  CDN marks a CRD kind as deprecated, it appears in the completion
+  dropdown with a strikethrough and `(deprecated)` label, so you can see
+  at a glance which API kinds are no longer recommended.
+- Bundled binary updated to v0.3.1.
+
+### Fixed
+
+- **Stale local schema cache caused missing diagnostics.** After the CDN
+  re-published a schema, the cached copy was served without re-verifying
+  its hash — silently dropping all validation results for the affected
+  file. The binary now re-fetches from the CDN when the cached schema
+  hash no longer matches the current manifest.
+
 ## 0.2.0 — 2026-06-02
 
 ### Changed
