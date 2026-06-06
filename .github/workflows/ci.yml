@@ -9,15 +9,12 @@ on:
 jobs:
   build:
     name: Lint · type-check · bundle · unit tests
-    runs-on: ubuntu-latest
+    runs-on: schemalock
+    container:
+      image: node:20
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -39,7 +36,7 @@ jobs:
     # Secrets are unavailable on fork PRs — integration tests run on push to
     # master and manual dispatch only.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: schemalock
     container:
       image: ghcr.io/schemalock/ci-base:latest
       options: --user root
