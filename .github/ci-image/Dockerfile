@@ -15,6 +15,7 @@ RUN apt-get update \
       xz-utils \
       jq \
       xvfb \
+      xauth \
       libnss3 \
       libgbm1 \
       libasound2 \
