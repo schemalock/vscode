@@ -44,6 +44,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.SCHEMALOCK_APP_ID }}
+          private-key: ${{ secrets.SCHEMALOCK_APP_PRIVATE_KEY }}
+          repositories: app
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -62,7 +69,7 @@ jobs:
             --output bin/linux-x64/schemalock
           chmod +x bin/linux-x64/schemalock
         env:
-          GH_TOKEN: ${{ secrets.SCHEMALOCK_APP_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Bundle
         run: npm run bundle
