@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    ignore:
+      # serialize-javascript is a transitive dep of mocha with no patched version
+      # available yet. Remove this ignore once mocha pulls in >= 7.0.5.
+      - dependency-name: serialize-javascript
