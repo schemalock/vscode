@@ -35,7 +35,9 @@ jobs:
     name: Integration tests (xvfb)
     # Secrets are unavailable on fork PRs — integration tests run on push to
     # master and manual dispatch only.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: schemalock
     container:
       image: ghcr.io/schemalock/ci-base:latest
