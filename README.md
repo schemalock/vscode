@@ -11,7 +11,7 @@ team with integrity hashes — every schema verified before use, no
 trust-on-first-use, no API key, no cloud sync.
 
 The bundled `schemalock` binary lives in
-[schemalock/app](https://github.com/schemalock/app); this repo is the
+[schemalock/schemalock](https://github.com/schemalock/schemalock); this repo is the
 thin VS Code shell around it.
 
 ## Install
@@ -58,7 +58,7 @@ For reproducible validation across CI and contributors, commit a
 
 1. Add an operator pin (`schemalock` CLI is bundled with the extension,
    or install separately with
-   `go install github.com/schemalock/app/cmd/schemalock@latest`):
+   `go install github.com/schemalock/schemalock/cmd/schemalock@latest`):
 
    ```bash
    schemalock add operator.victoriametrics.com@0.70.0
@@ -150,7 +150,7 @@ Error: SchemaLock binary not found at: .../bin/linux-arm64/schemalock
 Set `schemalock.binaryPath` to a locally built binary:
 
 ```bash
-go install github.com/schemalock/app/cmd/schemalock@latest
+go install github.com/schemalock/schemalock/cmd/schemalock@latest
 # then set schemalock.binaryPath = "$(which schemalock)"
 ```
 

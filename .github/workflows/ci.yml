@@ -66,7 +66,7 @@ jobs:
           APP_TAG=$(cat .app-version | tr -d '[:space:]')
           mkdir -p bin/linux-x64
           gh release download "$APP_TAG" \
-            --repo schemalock/app \
+            --repo schemalock/schemalock \
             --pattern "schemalock-linux-x64" \
             --output bin/linux-x64/schemalock
           chmod +x bin/linux-x64/schemalock
