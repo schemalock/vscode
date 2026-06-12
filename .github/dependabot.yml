@@ -6,5 +6,8 @@ updates:
       interval: weekly
     groups:
       npm-deps:
+        update-types:
+          - minor
+          - patch
         patterns:
           - "*"
