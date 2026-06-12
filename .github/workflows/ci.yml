@@ -51,7 +51,7 @@ jobs:
         with:
           app-id: ${{ vars.SCHEMALOCK_APP_ID }}
           private-key: ${{ secrets.SCHEMALOCK_APP_PRIVATE_KEY }}
-          repositories: app
+          repositories: schemalock
 
       - uses: actions/setup-node@v4
         with:
