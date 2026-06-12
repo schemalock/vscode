@@ -97,7 +97,7 @@
   },
   "scripts": {
     "compile": "tsc --noEmit",
-    "compile:unit": "tsc --outDir dist --module commonjs --target ES2022",
+    "compile:unit": "tsc --outDir dist --module node16 --target ES2022",
     "bundle": "node esbuild.js",
     "bundle:release": "node esbuild.js --minify",
     "watch": "node esbuild.js --watch",
@@ -111,7 +111,7 @@
     "test:unit": "npm run compile:unit && mocha --extension .js --recursive test/unit"
   },
   "dependencies": {
-    "vscode-languageclient": "^9.0.1",
+    "vscode-languageclient": "^10.0.0",
     "yaml": "^2.5.0"
   },
   "devDependencies": {
@@ -123,11 +123,11 @@
     "@vscode/vsce": "^2.31.0",
     "esbuild": "^0.28.1",
     "eslint": "^10.5.0",
-    "glob": "^10.4.0",
+    "glob": "^13.0.6",
     "globals": "^16.0.0",
     "mocha": "^11.7.6",
     "tmp": "^0.2.7",
-    "typescript": "^5.5.0",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0"
   }
 }

@@ -13,7 +13,7 @@ import { initStatusBar, setState } from "./status";
 import * as documentStatus from "./documentStatus";
 
 let client: LanguageClient | undefined;
-let outputChannel: vscode.OutputChannel | undefined;
+let outputChannel: vscode.LogOutputChannel | undefined;
 let activeBinaryPath: string | undefined;
 let activeContext: vscode.ExtensionContext | undefined;
 let crashTimestamps: number[] = [];
@@ -31,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Extens
     getDocumentState: (uri: string) => documentStatus.getDocumentState(uri),
   };
 
-  outputChannel = vscode.window.createOutputChannel("SchemaLock");
+  outputChannel = vscode.window.createOutputChannel("SchemaLock", { log: true });
   context.subscriptions.push(outputChannel);
 
   initStatusBar(context);
@@ -130,7 +130,7 @@ export async function deactivate(): Promise<void> {
 async function startClient(
   context: vscode.ExtensionContext,
   binaryPath: string,
-  channel: vscode.OutputChannel
+  channel: vscode.LogOutputChannel
 ): Promise<void> {
   crashTimestamps = [];
 
@@ -206,7 +206,7 @@ const SUPPRESS_CONFLICT_WARNING_KEY = "schemalock.suppressYamlConflictWarning";
 
 async function warnIfConflictingYamlExtension(
   context: vscode.ExtensionContext,
-  channel: vscode.OutputChannel
+  channel: vscode.LogOutputChannel
 ): Promise<void> {
   const conflict = vscode.extensions.getExtension(CONFLICTING_EXTENSION_ID);
   if (!conflict) return;
