@@ -97,7 +97,7 @@
   },
   "scripts": {
     "compile": "tsc --noEmit",
-    "compile:unit": "tsc --outDir dist --module commonjs --target ES2022",
+    "compile:unit": "tsc --outDir dist --module node16 --target ES2022",
     "bundle": "node esbuild.js",
     "bundle:release": "node esbuild.js --minify",
     "watch": "node esbuild.js --watch",
@@ -127,7 +127,7 @@
     "globals": "^16.0.0",
     "mocha": "^11.7.6",
     "tmp": "^0.2.7",
-    "typescript": "^5.5.0",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0"
   }
 }
