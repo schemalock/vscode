@@ -111,7 +111,7 @@
     "test:unit": "npm run compile:unit && mocha --extension .js --recursive test/unit"
   },
   "dependencies": {
-    "vscode-languageclient": "^9.0.1",
+    "vscode-languageclient": "^10.0.0",
     "yaml": "^2.5.0"
   },
   "devDependencies": {
